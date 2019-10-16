@@ -17,9 +17,14 @@ class MarkTime(MycroftSkill):
     @intent_file_handler('conclude.intent')
     def handle_conclude(self, message):
         self.settings["prior_duration"] = round(time.time()) - self.settings["tzero"] 
-        data = {'duration': self.settings["prior_duration"], 'ending_time': round(time.time())}
+        data = {'duration': self.settings["prior_duration"], 'ending_time': time.strftime("%H:%M")} #TODO: i thought this was supposed to be localtime? or it is but mark1 localtime is UTC anyway?
         self.speak_dialog('conclude',data)
         
+    @intent_file_handler('report.progress.intent')
+    def handle_progress(self, message):
+        running_duration = round(time.time()) - self.settings["tzero"] 
+        data = {'duration': running_duration} 
+        self.speak_dialog('report.progress',data)
 
 def create_skill():
     return MarkTime()
