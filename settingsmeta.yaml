@@ -1,6 +1,18 @@
 name: Mark time
 skillMetadata:
   sections:
+    - name: Persistence
+      fields:
+        - name: tzero
+          type: number
+          label: "Time-Zero for most recent beginning of mark-time"
+          value: 0
+          placeholder: "12345678 (in UNIX-time, which is seconds since the Epoch)"
+        - name: prior_duration 
+          type: number
+          label: "Prior result duration in seconds"
+          value: 0
+          placeholder: "60"
     - name: Options << Name of section
       fields:
         - name: internal_python_variable_name
