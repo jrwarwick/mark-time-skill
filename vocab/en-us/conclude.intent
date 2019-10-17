@@ -1,6 +1,10 @@
 conclude marking time
 stop marking time
 end marking time
+quit marking time
 deactivate stopwatch
+stop stopwatch
+conclude time tracking
 end time tracking
 stop time tracking
+quit time tracking

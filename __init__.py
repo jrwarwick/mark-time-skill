@@ -5,7 +5,7 @@ class MarkTime(MycroftSkill):
     def __init__(self):
         MycroftSkill.__init__(self)
 
-    #TODO:  a friendly time convert/reading for minutes and hours, perhaps so on. Perhaps influenced by some settingsmeta?
+    #TODO: a friendly time convert/reading for minutes and hours, perhaps so on. Perhaps influenced by some settingsmeta?
     #              https://stackoverflow.com/a/775095/537243
     #      maybe an optional chime/bell at x minutes (really just a variant of mentronome, or just identical?) 
     #      technically, the  "stop" is not stateful, and so you can just ask for a stop multiple times in a row, 
@@ -14,6 +14,7 @@ class MarkTime(MycroftSkill):
     #      maybe a settings option for operating at overriding local time and using UTC instead? but default to local
     #      decision: leave KISS as is: just "remember" the latest tzero? Or have a separate boolean state variable for "active marking session" (i.e., whether the most recent request was a "stop" and/or an expiration has passed)
     #      optional rider clause(s)? E.g., optionally be able to say:  "begin marking time, but stop after an hour." which is implicitly setting an expiration warning at that time.
+    #      a couple of other maybe/possibly/onedays:  add a little bit more "memory" by keeping a little queue of maybe 3-5 of the most recent timings; allow for inquiry on "the one before that" or something. Also optional naming/tagging for each of the entries; thus could you ask "how long was the 'mile run' time?" 
 
     @intent_file_handler('time.mark.intent')
     def handle_time_mark(self, message):
