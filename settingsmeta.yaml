@@ -3,32 +3,27 @@ skillMetadata:
   sections:
     - name: Persistence
       fields:
+        - type: label
+          label: These are not really settings per se. Persistent storage or "memory" for Mycroft to remember time state.
         - name: tzero
           type: number
           label: "Time-Zero for most recent beginning of mark-time"
           value: 0
-          placeholder: "12345678 (in UNIX-time, which is seconds since the Epoch)"
+          placeholder: 12345678 (in UNIX-time, which is seconds since the Epoch)
         - name: prior_duration 
           type: number
           label: "Prior result duration in seconds"
           value: 0
-          placeholder: "60"
-    - name: Options << Name of section
+          placeholder: 60
+    - name: Options
       fields:
         - name: internal_python_variable_name
           type: text
           label: Setting Friendly Display Name
           value: ""
           placeholder: demo prompt in the input box
-    - name: Login << Name of another section
-      fields:
-        - type: label
-          label: Just a little bit of extra info for the user to understand following settings
-        - name: username
-          type: text
-          label: Username
-          value: ""
-        - name: password
-          type: password
-          label: Password
-          value: ""
+        - name: audible_periodic_increment
+          type: number
+          label: Seconds between audible notifications of periodic cycle. Somewhat like a metronome.
+          value: 0
+          placeholder: 0 to deactivate, 600 for every 10 minutes
