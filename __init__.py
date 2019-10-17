@@ -5,6 +5,13 @@ class MarkTime(MycroftSkill):
     def __init__(self):
         MycroftSkill.__init__(self)
 
+    #TODO:  a friendly time convert/reading for minutes and hours, perhaps so on. Perhaps influenced by some settingsmeta?
+    #              https://stackoverflow.com/a/775095/537243
+    #      maybe an optional chime/bell at x minutes (really just a variant of mentronome, or just identical?) 
+    #      technically, the  "stop" is not stateful, and so you can just ask for a stop multiple times in a row, 
+    #           and he is actually still "counting" and gives a reasonable stop reply each time. 
+    #           Maybe thats a feature, not a bug?
+
     @intent_file_handler('time.mark.intent')
     def handle_time_mark(self, message):
         self.settings["tzero"] = round(time.time())
@@ -16,16 +23,27 @@ class MarkTime(MycroftSkill):
 
     @intent_file_handler('conclude.intent')
     def handle_conclude(self, message):
-        self.settings["prior_duration"] = round(time.time()) - self.settings["tzero"] 
+        tzero = self.settings["tzero"] 
+        if tzero < 0:
+            LOGGER.debug("numeric error for tzero:"+tzero)
+            tzero = round(time.time())
+            self.settings["tzero"] = tzero
+            self.speak("My apologies, but either I lost track of time, or there was not yet a marking time task assigned. I have just reset the time zero marker.")
+        self.settings["prior_duration"] = round(time.time()) - tzero
         data = {'duration': self.settings["prior_duration"], 'ending_time': time.strftime("%H:%M")} #TODO: i thought this was supposed to be localtime? or it is but mark1 localtime is UTC anyway?
         self.speak_dialog('conclude',data)
         
     @intent_file_handler('report.progress.intent')
     def handle_progress(self, message):
-        running_duration = round(time.time()) - self.settings["tzero"] 
-        data = {'duration': running_duration} 
-        self.speak_dialog('report.progress',data)
+        if tzero < 0:
+            LOGGER.debug("numeric error for tzero:"+tzero)
+            self.speak("My apologies, but either I lost track of time, or there was not yet a marking time task assigned.")
+        else:
+            running_duration = round(time.time()) - self.settings["tzero"] 
+            data = {'duration': running_duration} 
+            self.speak_dialog('report.progress',data)
 
+    #TODO: maybe an intent_reset which is perhaps just a stop followed immediately by a start
 def create_skill():
     return MarkTime()
 
