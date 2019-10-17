@@ -11,11 +11,15 @@ class MarkTime(MycroftSkill):
     #      technically, the  "stop" is not stateful, and so you can just ask for a stop multiple times in a row, 
     #           and he is actually still "counting" and gives a reasonable stop reply each time. 
     #           Maybe thats a feature, not a bug?
+    #      maybe a settings option for operating at overriding local time and using UTC instead? but default to local
+    #      decision: leave KISS as is: just "remember" the latest tzero? Or have a separate boolean state variable for "active marking session" (i.e., whether the most recent request was a "stop" and/or an expiration has passed)
+    #      optional rider clause(s)? E.g., optionally be able to say:  "begin marking time, but stop after an hour." which is implicitly setting an expiration warning at that time.
 
     @intent_file_handler('time.mark.intent')
     def handle_time_mark(self, message):
         self.settings["tzero"] = round(time.time())
-        data = {'beginning_time': self.settings["tzero"]}
+        #data = {'beginning_time': self.settings["tzero"]}
+        data = {'beginning_time': time.strftime('%Y %B %d, %H:%M, %S seconds', time.localtime(self.settings["tzero"]))}
         self.speak_dialog('time.mark',data)
         #TODO: start an independent timer/metronome thread. 
         #If settingsmeta has a metronome beep interval, set that and set the beep flag to true.
