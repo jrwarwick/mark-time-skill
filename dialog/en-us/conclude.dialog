@@ -1,5 +1,5 @@
-Marking time concluded at {{ending_time}}. {{duration}} seconds in duration.
-Marking time ended at {{ending_time}}. {{duration}} seconds in duration.
-Counting time concluded with a duration of {{duration}} seconds.
-Counting time ended with a duration of {{duration}} seconds.
-Acknowledged. Duration was {{duration}} seconds.
+Marking time concluded at {{ending_time}}. {{duration}} in duration.
+Marking time ended at {{ending_time}}. {{duration}} in duration.
+Counting time concluded with a duration of {{duration}} .
+Counting time ended with a duration of {{duration}} .
+Acknowledged. Duration was {{duration}} .
