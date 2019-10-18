@@ -72,11 +72,11 @@ class MarkTime(MycroftSkill):
             pronounceable = nice_delta.pop(0)
         (h,m,s) = nice_delta[0].split(":") #are we assuming too much about element count?
         if int(h) > 0:
-            pronounceable += " " + str(h) + " hours"
+            pronounceable += " " + str(h) + " hour" + "s" if h.lstrip("0") != "1" else ""
         if int(m) > 0:
-            pronounceable += " " + str(m) + " minutes"
+            pronounceable += " " + str(m) + " minute" + "s" if m.lstrip("0") != "1" else ""
         if int(s) > 0:
-            pronounceable += " " + str(s) + " seconds"
+            pronounceable += " " + str(s) + " second" + "s" if s.lstrip("0") != "1" else ""
         return pronounceable
 
 
