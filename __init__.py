@@ -33,7 +33,11 @@ class MarkTime(MycroftSkill):
 
     @intent_file_handler('conclude.intent')
     def handle_conclude(self, message):
-        tzero = self.settings["tzero"] 
+        # It seems like sometimes a null/blank settings.json value will be "" 
+        # (i.e., a string) even if settingsmeta declares it a number.
+        # If this is later determined to be a bug, or a method of setting an
+        # unset number comes about, remove the int() cast here.
+        tzero = int(self.settings["tzero"] or 0)
         if tzero < 0:
             self.log.error("numeric error for tzero: "+tzero)
             tzero = round(time.time())
@@ -41,19 +45,29 @@ class MarkTime(MycroftSkill):
             self.speak("My apologies, but either I lost track of time, "
                        "or there was not yet a marking time task assigned. "
                        "I have just reset the time zero marker.")
-        self.settings["prior_duration"] = round(time.time()) - tzero
-        #TODO: look into this strftime call; I thought this was supposed to be localtime by default? 
-        #or it is but mark1 localtime is UTC anyway?
-        data = {'duration': self.nice_time_delta(self.settings["prior_duration"]), 
-                'ending_time': time.strftime("%H:%M")} 
-        self.speak_dialog('conclude',data)
+        elif tzero == 0:
+            self.speak_dialog('inactive')
+        else:
+            self.settings["prior_duration"] = round(time.time()) - tzero
+            #TODO: look into this strftime call; I thought this was supposed to be localtime by default? 
+            #or it is but mark1 localtime is UTC anyway?
+            data = {'duration': self.nice_time_delta(self.settings["prior_duration"]), 
+                    'ending_time': time.strftime("%H:%M")} 
+            self.speak_dialog('conclude',data)
         
     @intent_file_handler('report.progress.intent')
     def handle_progress(self, message):
+        # It seems like sometimes a null/blank settings.json value will be "" 
+        # (i.e., a string) even if settingsmeta declares it a number.
+        # If this is later determined to be a bug, or a method of setting an
+        # unset number comes about, remove the int() cast here.
+        tzero = int(self.settings["tzero"] or 0)
         if tzero < 0:
             self.log.error("numeric error for tzero: "+tzero)
             self.speak("My apologies, but either I lost track of time, "
                        "or there was not yet a marking time task assigned.")
+        elif tzero == 0:
+            self.speak_dialog('inactive')
         else:
             running_duration = round(time.time()) - self.settings["tzero"] 
             data = {'duration': running_duration} 
