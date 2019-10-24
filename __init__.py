@@ -89,7 +89,7 @@ class MarkTime(MycroftSkill):
             pronounceable += " " + str(h) + " hour" + ("s" if h.lstrip("0") != "1" else "")
         if int(m) > 0:
             pronounceable += " " + str(m) + " minute" + ("s" if m.lstrip("0") != "1" else "")
-        if int(s) > 0:
+        if int(s) > 0 and "days" not in pronounceable:
             pronounceable += " " + str(s) + " second" + ("s" if s.lstrip("0") != "1" else "")
         return pronounceable
 
