@@ -3,6 +3,7 @@ import time
 import datetime
 
 class MarkTime(MycroftSkill):
+
     def __init__(self):
         MycroftSkill.__init__(self)
 
@@ -25,10 +26,9 @@ class MarkTime(MycroftSkill):
     @intent_file_handler('time.mark.intent')
     def handle_time_mark(self, message):
         self.settings["tzero"] = round(time.time())
-        #data = {'beginning_time': self.settings["tzero"]}
         data = {'beginning_time': time.strftime('%Y %B %d, %H:%M, %S seconds',
                                                 time.localtime(self.settings["tzero"]))}
-        self.speak_dialog('time.mark',data)
+        self.speak_dialog('time.mark', data)
         # TODO: start an independent timer/metronome thread. Inside:
         #  If settingsmeta has a metronome beep interval:
         #    set that and set the beep flag to true.
@@ -57,7 +57,7 @@ class MarkTime(MycroftSkill):
             # or it is but mark1 localtime is UTC anyway?
             data = {'duration': self.nice_time_delta(self.settings["prior_duration"]),
                     'ending_time': time.strftime("%H:%M")}
-            self.speak_dialog('conclude',data)
+            self.speak_dialog('conclude', data)
 
     @intent_file_handler('report.progress.intent')
     def handle_progress(self, message):
@@ -75,12 +75,12 @@ class MarkTime(MycroftSkill):
         else:
             running_duration = round(time.time()) - self.settings["tzero"]
             data = {'duration': running_duration}
-            self.speak_dialog('report.progress',data)
+            self.speak_dialog('report.progress', data)
 
     # TODO: maybe an intent_reset which is perhaps just a stop followed immediately by a start
 
     def nice_time_delta(self, delta_seconds):
-        # is a validation step on the parameter needed?
+        # Is a validation step on the parameter needed?
         #   If so, what do we return? or raise exception?
         # '6 days, 22:40:00' when greater than a day's delta
         self.log.debug("Delta Style:  " + str(datetime.timedelta(seconds=delta_seconds)))
