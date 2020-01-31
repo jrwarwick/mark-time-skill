@@ -1,10 +1,14 @@
 from mycroft import MycroftSkill, intent_file_handler
+from mycroft.audio import wait_while_speaking, is_speaking
+from mycroft.util import play_wav
+from os.path import join, isfile, abspath, dirname
 import time
 import datetime
 
 class MarkTime(MycroftSkill):
 
     def __init__(self):
+        self.periodic_increment_sound_file = join(abspath(dirname(__file__)), 'intervalBeep.wav')
         MycroftSkill.__init__(self)
 
     # TODO: 
@@ -14,9 +18,11 @@ class MarkTime(MycroftSkill):
     #      - Maybe an optional chime/bell at x seconds/minutes intervals (like a mentronome) 
     #        instead of verbal announcement
     #      - a new voice intent to modify the period length (and/or disable/enable)
+    #  Actually do something with skill settings audible_periodic_notification, look into a "standard" beep sound
     #  Investigate and test the result of changing settings with ongoing time session.
     #      there may be a tzero-wipe out going on. Maybe settings for persistence
     #      was a mistake and needs to be fixed.
+    #      particularly have a look at mycroft-timer, it has a whole pickling thing going on.
     #  Expiration/max-limit warning: 
     #      if enabled, pre set a time afterwhich mycroft auto-invokes 
     #      handle_conclude (ends marking time and announces)
@@ -95,15 +101,19 @@ class MarkTime(MycroftSkill):
     # TODO: maybe an intent_reset which is perhaps just a stop followed immediately by a start
 
     def audible_increment_handler(self):
-        tzero = int(self.settings["tzero"] or 0)
-        #TODO: check to see if determine first-time-state is good
-        if (round(time.time()) - tzero) >= self.settings["audible_periodic_increment"]:
-            if self.settings["audible_periodic_increment"] < 1:
-                self.cancel_scheduled_event('MarkTime_audible_increment')
-                self.log.info("audible_increment off, update_interval {} seconds".format(self.settings["audible_periodic_increment"]))
-            else:
-                #self.speak(str(self.settings["audible_periodic_increment"]) + " seconds")
-                self.speak(self.nice_time_delta(round(time.time()) - tzero))
+        if self.settings["audible_periodic_increment"] < 1:
+            self.cancel_scheduled_event('MarkTime_audible_increment')
+            self.log.info("audible_increment off, update_interval {} seconds".format(self.settings["audible_periodic_increment"]))
+        else:
+            tzero = int(self.settings["tzero"] or 0)
+            if ((round(time.time()) - tzero) >= self.settings["audible_periodic_increment"] and
+                not is_speaking()):
+                    if self.settings["audible_periodic_notification"] == "none":
+                        self.log.info("audible_increment event firing, but effectively mute due to none setting.")
+                    elif self.settings["audible_periodic_notification"] == "beep_sound":
+                        play_wav(self.periodic_increment_sound_file)
+                    else:
+                        self.speak(self.nice_time_delta(round(time.time()) - tzero))
         #TODO: keep track of quantity of increments? 
 
     def nice_time_delta(self, delta_seconds):
