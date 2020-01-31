@@ -1,6 +1,17 @@
 name: Mark time
 skillMetadata:
   sections:
+    - name: Options
+      fields:
+        - name: audible_periodic_increment
+          type: number
+          label: Seconds between audible notifications of periodic cycle. Somewhat like a metronome.
+          value: 0
+          placeholder: 0 to deactivate, 600 for every 10 minutes
+        - name: display_time
+          type: checkbox
+          label: Visually display stopwatch time
+          value: "false"
     - name: Persistence
       fields:
         - type: label
@@ -15,15 +26,3 @@ skillMetadata:
           label: "Prior result duration in seconds"
           value: 0
           placeholder: 60
-    - name: Options
-      fields:
-        - name: internal_python_variable_name
-          type: text
-          label: Setting Friendly Display Name
-          value: ""
-          placeholder: demo prompt in the input box
-        - name: audible_periodic_increment
-          type: number
-          label: Seconds between audible notifications of periodic cycle. Somewhat like a metronome.
-          value: 0
-          placeholder: 0 to deactivate, 600 for every 10 minutes
