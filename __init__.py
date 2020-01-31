@@ -8,20 +8,34 @@ class MarkTime(MycroftSkill):
         MycroftSkill.__init__(self)
 
     # TODO: 
-    #  A friendly time convert/reading for minutes and hours, perhaps so on. Perhaps influenced by some settingsmeta?
+    #  An even more friendly time convert/reading for minutes and hours, perhaps so on. Perhaps influenced by some settingsmeta?
     #    https://stackoverflow.com/a/775095/537243
-    #  Maybe an optional chime/bell at x seconds/minutes intervals (really just a variant of mentronome, or even identical?) 
-    #  Technically, right now, the "stop" is not stateful, and so you can just ask for a stop multiple times in a row, 
-    #      and he is actually still "counting" and gives a reasonable stop reply each time. 
-    #      Maybe thats a feature, not a bug?
-    #  Maybe a settings option for operating at overriding local time and using UTC instead? but default to local
-    #  Decision: leave KISS as is: just "remember" the latest tzero? Or have a separate boolean state variable 
-    #          for "active marking session" (i.e., whether the most recent request was a "stop" and/or an expiration has passed)
+    #  Metronome (so to speak): 
+    #      - Maybe an optional chime/bell at x seconds/minutes intervals (like a mentronome) 
+    #        instead of verbal announcement
+    #      - a new voice intent to modify the period length (and/or disable/enable)
+    #  Investigate and test the result of changing settings with ongoing time session.
+    #      there may be a tzero-wipe out going on. Maybe settings for persistence
+    #      was a mistake and needs to be fixed.
+    #  Expiration/max-limit warning: 
+    #      if enabled, pre set a time afterwhich mycroft auto-invokes 
+    #      handle_conclude (ends marking time and announces)
+    #  Technically, right now, the "stop" is not stateful, and so you can just 
+    #      ask for a stop multiple times in a row, and he is actually still "counting" 
+    #      and gives a reasonable stop reply each time. 
+    #      Yet, Maybe thats a feature, not a bug?
+    #  Maybe a settings option for operating at overriding local time 
+    #      and using UTC instead? but default to local
+    #  Decision: leave KISS as is: just "remember" the latest tzero? 
+    #      Or have a separate boolean state variable for "active marking session" 
+    #      (i.e., whether the most recent request was a "stop" and/or an expiration has passed)
     #  Optional rider clause(s)? E.g., optionally be able to say:  
-    #          "begin marking time, but stop after an hour." which is implicitly setting an expiration warning at that time.
+    #      "begin marking time, but stop after an hour." 
+    #      "begin marking time, for a 10 minute duration." 
+    #      which is implicitly setting an expiration warning at that time.
     #  A couple of other maybe/possibly/one-days:  add a little bit more "memory" by keeping a little queue 
-    #          of maybe 3-5 of the most recent timings; allow for inquiry on "the one before that" or something. 
-    #          Also optional naming/tagging for each of the entries; thus could you ask "how long was the 'mile run' time?" 
+    #      of maybe 3-5 of the most recent timings; allow for inquiry on "the one before that" or something. 
+    #      Also optional naming/tagging for each of the entries; thus could you ask "how long was the 'mile run' time?" 
 
     @intent_file_handler('time.mark.intent')
     def handle_time_mark(self, message):
@@ -29,12 +43,10 @@ class MarkTime(MycroftSkill):
         data = {'beginning_time': time.strftime('%Y %B %d, %H:%M, %S seconds',
                                                 time.localtime(self.settings["tzero"]))}
         self.speak_dialog('time.mark', data)
-        # TODO: start an independent timer/metronome thread. Inside:
-        #  If settingsmeta has a metronome beep interval:
-        #    set that and set the beep flag to true.
-        #  If settingsmeta has a metronome announce interval:
-        #    set that and set the announce flag to true.
-
+        if self.settings["audible_periodic_increment"] > 2:
+            self.schedule_repeating_event(handler=self.audible_increment_handler, when=datetime.datetime.now(), frequency=self.settings["audible_periodic_increment"], name='MarkTime_audible_increment')
+            self.log.info("audible_increment on, update_interval {} seconds".format(self.settings["audible_periodic_increment"]))
+            
     @intent_file_handler('conclude.intent')
     def handle_conclude(self, message):
         # It seems like sometimes a null/blank settings.json value will be ""
@@ -58,6 +70,9 @@ class MarkTime(MycroftSkill):
             data = {'duration': self.nice_time_delta(self.settings["prior_duration"]),
                     'ending_time': time.strftime("%H:%M")}
             self.speak_dialog('conclude', data)
+        #TODO: confirm if we need to check for running status before issuing a cancel.
+        self.cancel_scheduled_event('MarkTime_audible_increment')
+        self.log.info("audible_increment off. update_interval {} seconds".format(self.settings["audible_periodic_increment"]))
 
     @intent_file_handler('report.progress.intent')
     def handle_progress(self, message):
@@ -78,6 +93,18 @@ class MarkTime(MycroftSkill):
             self.speak_dialog('report.progress', data)
 
     # TODO: maybe an intent_reset which is perhaps just a stop followed immediately by a start
+
+    def audible_increment_handler(self):
+        tzero = int(self.settings["tzero"] or 0)
+        #TODO: check to see if determine first-time-state is good
+        if (round(time.time()) - tzero) >= self.settings["audible_periodic_increment"]:
+            if self.settings["audible_periodic_increment"] < 1:
+                self.cancel_scheduled_event('MarkTime_audible_increment')
+                self.log.info("audible_increment off, update_interval {} seconds".format(self.settings["audible_periodic_increment"]))
+            else:
+                #self.speak(str(self.settings["audible_periodic_increment"]) + " seconds")
+                self.speak(self.nice_time_delta(round(time.time()) - tzero))
+        #TODO: keep track of quantity of increments? 
 
     def nice_time_delta(self, delta_seconds):
         # Is a validation step on the parameter needed?
